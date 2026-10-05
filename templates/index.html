@@ -54,8 +54,8 @@
 
                 <div class="monitor">
                     <div class="monitor-row">
-                        <span>Last update</span>
-                        <strong id="timestamp">--</strong>
+                        <span>Data source</span>
+                        <strong id="raw">ESP32 → Wi-Fi → Cloud</strong>
                     </div>
                     <div class="monitor-row">
                         <span>Raw serial line</span>
@@ -134,7 +134,7 @@ async function updateDashboard() {
 } else {
     document.getElementById("timestamp").textContent = "--";
 }
-        document.getElementById("raw").textContent = data.raw || "Waiting...";
+        document.getElementById("raw").textContent = "ESP32 → Wi-Fi → Cloud";
     } catch (error) {
         console.error(error);
     }
