@@ -134,8 +134,10 @@ def api_update():
         if "fan" in data:
             latest["fan"] = data["fan"]
 
-    return jsonify({"status": "updated"})
+        latest["connected"] = True
+        latest["timestamp"] = time.time()
 
+    return jsonify({"status": "updated"})
 
 def main():
     parser = argparse.ArgumentParser(description="ESP32 Fan Monitoring Dashboard")
