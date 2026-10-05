@@ -48,7 +48,7 @@
                         <p>Data is read from the ESP32 serial output.</p>
                     </div>
                     <div class="small-status">
-                        Port: <strong id="port">--</strong>
+                        Connection: <strong id="port">Wi-Fi</strong>
                     </div>
                 </div>
 
@@ -116,7 +116,7 @@ async function updateDashboard() {
             fanHint.textContent = "Waiting for data";
         }
 
-        document.getElementById("port").textContent = data.port || "--";
+        
         if (data.timestamp) {
     const date = new Date(data.timestamp * 1000);
 
