@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Fan Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="page">
+        <header>
+            <div>
+                <p class="eyebrow">ESP32 • DHT11 • RELAY</p>
+                <h1>Smart Fan Monitor</h1>
+                <p class="subtitle">Live temperature, humidity and automatic fan status</p>
+            </div>
+            <div id="connection" class="status-pill offline">
+                <span class="dot"></span>
+                <span>Disconnected</span>
+            </div>
+        </header>
+
+        <main>
+            <section class="cards">
+                <article class="card">
+                    <div class="card-title">Temperature</div>
+                    <div class="value"><span id="temperature">--</span><span class="unit">°C</span></div>
+                    <div class="hint">Fan ON at 33°C</div>
+                </article>
+
+                <article class="card">
+                    <div class="card-title">Humidity</div>
+                    <div class="value"><span id="humidity">--</span><span class="unit">%</span></div>
+                    <div class="hint">DHT11 reading</div>
+                </article>
+
+                <article class="card fan-card">
+                    <div class="card-title">Fan Status</div>
+                    <div id="fan" class="fan-status unknown">UNKNOWN</div>
+                    <div id="fan-hint" class="hint">Waiting for data</div>
+                </article>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Live Monitor</h2>
+                        <p>Data is read from the ESP32 serial output.</p>
+                    </div>
+                    <div class="small-status">
+                        Port: <strong id="port">--</strong>
+                    </div>
+                </div>
+
+                <div class="monitor">
+                    <div class="monitor-row">
+                        <span>Last update</span>
+                        <strong id="timestamp">--</strong>
+                    </div>
+                    <div class="monitor-row">
+                        <span>Raw serial line</span>
+                        <strong id="raw">Waiting...</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Control Logic</h2>
+                        <p>These values come from your Arduino code.</p>
+                    </div>
+                </div>
+
+                <div class="logic">
+                    <div><span>Fan ON threshold</span><strong>33.0 °C</strong></div>
+                    <div><span>Fan OFF threshold</span><strong>32.0 °C</strong></div>
+                    <div><span>Minimum ON time</span><strong>30 seconds</strong></div>
+                    <div><span>Sensor</span><strong>DHT11</strong></div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            Local dashboard • Flask + Python + ESP32
+        </footer>
+    </div>
+
+<script>
+async function updateDashboard() {
+    try {
+        const response = await fetch("/api/data", { cache: "no-store" });
+        const data = await response.json();
+
+        const connection = document.getElementById("connection");
+        const temp = document.getElementById("temperature");
+        const humidity = document.getElementById("humidity");
+        const fan = document.getElementById("fan");
+        const fanHint = document.getElementById("fan-hint");
+
+        connection.className = "status-pill " + (data.connected ? "online" : "offline");
+        connection.querySelector("span:last-child").textContent =
+            data.connected ? "ESP32 Connected" : "Disconnected";
+
+        temp.textContent = data.temperature === null ? "--" : Number(data.temperature).toFixed(1);
+        humidity.textContent = data.humidity === null ? "--" : Number(data.humidity).toFixed(0);
+
+        fan.textContent = data.fan || "UNKNOWN";
+        fan.className = "fan-status " + String(data.fan || "unknown").toLowerCase();
+
+        if (data.fan === "ON") {
+            fanHint.textContent = "Fan is running";
+        } else if (data.fan === "OFF") {
+            fanHint.textContent = "Fan is stopped";
+        } else {
+            fanHint.textContent = "Waiting for data";
+        }
+
+        document.getElementById("port").textContent = data.port || "--";
+        document.getElementById("timestamp").textContent = data.timestamp || "--";
+        document.getElementById("raw").textContent = data.raw || "Waiting...";
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+updateDashboard();
+setInterval(updateDashboard, 1000);
+</script>
+</body>
+</html>
