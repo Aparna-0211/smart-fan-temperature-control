@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 
 import serial
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 
 app = Flask(__name__)
 
@@ -115,6 +115,26 @@ def index():
 def api_data():
     with lock:
         return jsonify(dict(latest))
+
+
+@app.route("/api/update", methods=["POST"])
+def api_update():
+    data = request.get_json(silent=True)
+
+    if not data:
+        return jsonify({"error": "No data received"}), 400
+
+    with lock:
+        if "temperature" in data:
+            latest["temperature"] = data["temperature"]
+
+        if "humidity" in data:
+            latest["humidity"] = data["humidity"]
+
+        if "fan" in data:
+            latest["fan"] = data["fan"]
+
+    return jsonify({"status": "updated"})
 
 
 def main():
