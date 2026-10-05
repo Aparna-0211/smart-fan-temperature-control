@@ -144,7 +144,7 @@ def main():
     parser.add_argument("--baud", type=int, default=115200,
                         help="Serial baud rate")
     parser.add_argument("--host", default="0.0.0.0")
-parser.add_argument("--web-port", type=int, default=int(os.getenv("PORT", 5000)))
+    parser.add_argument("--web-port", type=int, default=int(os.getenv("PORT", 5000)))
     args = parser.parse_args()
 
     worker = threading.Thread(
